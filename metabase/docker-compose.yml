@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  metabase:
+    image: metabase/metabase
+    environment:
+      LETSENCRYPT_HOST: metabase.hattadatta.com
+      VIRTUAL_HOST: metabase.hattadatta.com
+      VIRTUAL_PORT: 3000
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase
+      MB_DB_PASS: hattadattalogue
+      MB_DB_HOST: postgres
+      JAVA_TIMEZONE: "Asia/Jakarta"
+    networks:
+      - dss
+      - didithilmy
+  postgres:
+    image: postgres
+    restart: always
+    networks: 
+      - dss
+    environment:
+      POSTGRES_DB: metabase
+      POSTGRES_USER: metabase
+      POSTGRES_PASSWORD: hattadattalogue
+    volumes:
+      - "psql_data:/var/lib/postgresql/data"
+  pg_admin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      LETSENCRYPT_HOST: pgadmin.hattadatta.com
+      VIRTUAL_HOST: pgadmin.hattadatta.com
+      VIRTUAL_PORT: 3000
+    networks:
+      - dss
+      - didithilmy
+
+volumes:
+  psql_data:
+
+networks:
+  dss:
+  didithilmy:
+    external:
+      name: didithilmy
