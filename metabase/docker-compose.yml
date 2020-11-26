@@ -35,6 +35,8 @@ services:
       LETSENCRYPT_HOST: pgadmin.hattadatta.com
       VIRTUAL_HOST: pgadmin.hattadatta.com
       VIRTUAL_PORT: 3000
+      PGADMIN_DEFAULT_EMAIL: mhilmy@hey.com
+      PGADMIN_DEFAULT_PASSWORD: hattadattalogue
     networks:
       - dss
       - didithilmy
