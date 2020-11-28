@@ -1,0 +1,5 @@
+FROM ubuntu
+COPY ./run.sh /code/run.sh
+RUN chmod 777 /code/run.sh
+
+CMD ["/code/run.sh"]

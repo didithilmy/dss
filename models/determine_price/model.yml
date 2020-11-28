@@ -1,0 +1,6 @@
+version: 1
+
+name: determine_price
+description: A sample model to determine price
+image_name: dss/determine-price
+dockerfile: Dockerfile.custom

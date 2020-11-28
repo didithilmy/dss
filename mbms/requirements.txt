@@ -1,0 +1,5 @@
+Flask
+Flask-API
+docker
+python-dotenv
+PyYAML
