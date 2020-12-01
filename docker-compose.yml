@@ -11,6 +11,7 @@ services:
       DATA_TMP_PATH: "${DATA_TMP_PATH}"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${MODELS_PATH}:${MODELS_PATH}"
       - "${DATA_TMP_PATH}:${DATA_TMP_PATH}"
     networks:
       - dss
