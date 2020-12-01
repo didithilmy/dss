@@ -22,6 +22,7 @@ services:
     restart: always
     networks: 
       - dss
+      - dssext
     environment:
       POSTGRES_DB: metabase
       POSTGRES_USER: metabase
@@ -49,3 +50,6 @@ networks:
   didithilmy:
     external:
       name: didithilmy
+  dssext:
+    external:
+      name: dss

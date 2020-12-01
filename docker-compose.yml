@@ -22,3 +22,6 @@ networks:
   didithilmy:
     external:
       name: didithilmy
+  dssext:
+    external:
+      name: dss
