@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  mbms:
+    build: ./mbms
+    environment: 
+      LETSENCRYPT_HOST: pelican.hattadatta.com
+      VIRTUAL_HOST: pelican.hattadatta.com
+      DEBUG: "${DEBUG}"
+      MODELS_PATH: "${MODELS_PATH}"
+      DATA_TMP_PATH: "${DATA_TMP_PATH}"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - dss
+      - didithilmy
+
+networks:
+  dss:
+  didithilmy:
+    external:
+      name: didithilmy
