@@ -2,4 +2,5 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-MBMS_URL = "https://pelican.hattadatta.com/models/determine_packages/run/"
+MBMS_URL = os.getenv('MBMS_URL')
+DB_URL = os.getenv('DB_URL')

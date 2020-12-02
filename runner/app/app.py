@@ -2,10 +2,11 @@ import json
 import requests
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
+from flask import render_template
 import settings
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/dss'
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.DB_URL
 db = SQLAlchemy(app)
 
 
@@ -32,15 +33,6 @@ def get_historical_pricing_data(region_code):
     return results
 
 
-def get_historical_market_info(region_code):
-    results = []
-    result = db.session.execute(
-        "SELECT * FROM historical_market_info WHERE region_code = ':region_code'", {'region_code': region_code})
-    for r in result:
-        results.append(dict(r.items()))
-    return results
-
-
 def get_data_packages():
     results = []
     result = db.session.execute("SELECT * FROM data_package")
@@ -49,42 +41,69 @@ def get_data_packages():
     return results
 
 
+def get_region():
+    results = []
+    result = db.session.execute("SELECT * FROM region")
+    for r in result:
+        results.append(dict(r.items()))
+    return results
+
+
+def get_region_by_code(region_code):
+    results = []
+    result = db.session.execute(
+        "SELECT * FROM region WHERE region_code = ':region_code'", {'region_code': region_code})
+    for r in result:
+        results.append(dict(r.items()))
+    return results[0]
+
+
 def do_inference(region_code, date):
     hist_pricing_data = get_historical_pricing_data(region_code)
-    hist_market_info = get_historical_market_info(region_code)
     data_packages = get_data_packages()
 
     data = {
         'hist_pricing_data': hist_pricing_data,
-        'hist_market_info': hist_market_info,
         'data_packages': data_packages,
         'date': date
     }
 
-    r = requests.post(settings.MBMS_URL, json=data)
+    r = requests.post(settings.MBMS_URL + '/models/determine_packages/run/', json=data)
     r_data = r.json()
 
+    r_output = r_data['output']
     rec_entities = []
-    for rec in r_data:
+    for rec in r_output:
         price = rec['price']
         quota = rec['quota']
         draft_package_id = rec['draft_package_id']
-        rec_entity = PackageRecommendation(date=date, region_code=region_code, price=price, quota=quota, draft_package_id=draft_package_id)
-        
-        db.session.save(rec_entity)
-        rec_entities.append(dict(rec_entity))
+        rec_entity = PackageRecommendation(
+            date=date, region_code=region_code, price=price, quota=quota, draft_package_id=draft_package_id)
 
+        try:
+            db.session.add(rec_entity)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            print("Duplicate key, skipping...")
+
+        rec_entities.append(dict(date=date, region_code=region_code,
+                                 price=price, quota=quota, draft_package_id=draft_package_id))
     return rec_entities
 
+
 @app.route('/')
-def hello_world():
-    hist_pricing_data = get_historical_pricing_data(1101)
-    hist_market_info = get_historical_market_info(1101)
-    data_packages = get_data_packages()
-    
-    data = {
-        'hist_pricing_data': hist_pricing_data,
-        'hist_market_info': hist_market_info,
-        'data_packages': data_packages,
-    }
-    return json.dumps(data, default=str)
+def home():
+    regions = get_region()
+    return render_template('index.html', regions=regions)
+
+
+@app.route('/infer', methods=['POST'])
+def infer():
+    region_code = int(request.form['region_code'])
+    date = request.form['date']
+
+    result = do_inference(region_code, date)
+    region = get_region_by_code(region_code)
+
+    return render_template('result.html', result=result, region=region, date=date)

@@ -16,6 +16,18 @@ services:
     networks:
       - dss
       - didithilmy
+  runner:
+    build: ./runner
+    environment: 
+      LETSENCRYPT_HOST: kitten.hattadatta.com
+      VIRTUAL_HOST: kitten.hattadatta.com
+      DEBUG: "${DEBUG}"
+      MBMS_URL: "http://mbms"
+      DB_URL: "${DB_URL}"
+    networks:
+      - dss
+      - didithilmy
+      - dssext
 
 networks:
   dss:
